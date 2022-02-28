@@ -13,8 +13,6 @@ class MyWidget(QMainWindow):
         uic.loadUi("main.ui", self)
         self.con = sqlite3.connect("coffee.sqlite")
         self.pushButton_1.clicked.connect(self.add_1)
-        self.pushButton_2.clicked.connect(self.change_1)
-        self.pushButton_3.clicked.connect(self.delete_1)
         self.lll_1 = -1
         self.lll_2 = -1
         self.value_to_edit = None
@@ -26,7 +24,6 @@ class MyWidget(QMainWindow):
                     'вестерн': '19', 'мистика': '20', 'короткометражный': '21',
                     'мюзикл': '22', 'исторический': '23', 'нуар': '24'}
         self.cur = self.con.cursor()
-        self.tableWidget_1.cellClicked.connect(self.row_column_clicked_1)
         self.update_result_1()
 
     def row_column_clicked_1(self):
@@ -37,15 +34,11 @@ class MyWidget(QMainWindow):
         # print(row)
 
     def add_1(self):
+        print(222)
         d = Dialog_add(self)
+        print(333)
         d.exec()
-        namee, year, genre, duration = d.name_Param.text(), int(d.year_Param.text()), d.comb_Param.currentText(), int(
-            d.dur_Param.text())
-        self.lll_1 = self.lll_1 + 1
-        self.cur.execute(
-            f"""INSERT INTO films(id,title, year, genre, duration) VALUES({self.lll_1},{"'" + namee + "'"}, {year}, {self.dic[genre]}, {duration})""")
-        self.con.commit()
-        self.update_result_1()
+        print(555)
 
     def change_1(self):
         if self.value_to_edit_1:
@@ -65,15 +58,6 @@ class MyWidget(QMainWindow):
             # self.lll = self.lll + 1
             self.cur.execute(
                 f"""UPDATE films SET title = {"'" + namee + "'"}, duration = {duration}, year = {year}, genre = {self.dic[genre]} WHERE id = {self.tableWidget_1.item(self.value_to_edit_1[0], 0).text()}""")
-            self.con.commit()
-            self.update_result_1()
-            self.value_to_edit_1 = None
-
-    def delete_1(self):
-        if self.value_to_edit_1:
-            self.lll_1 = self.lll_1 - 1
-            result = self.cur.execute((f"""DELETE from films
-            where id = {self.tableWidget_1.item(self.value_to_edit_1[0], 0).text()}""")).fetchall()
             self.con.commit()
             self.update_result_1()
             self.value_to_edit_1 = None
@@ -102,138 +86,39 @@ FROM
 
 
 class Dialog_add(QDialog):
-    def __init__(self, parent=None, volume=0):
-        super(Dialog_add, self).__init__(parent)
-        self.initUI()
+    def __init__(self, parent=None):
+        super().__init__()
+        self.parent = parent
+        uic.loadUi("addEditCoffeeForm.ui", self)
+        self.pushButton.clicked.connect(self.add)
+        self.pushButton_2.clicked.connect(self.change)
 
-    def initUI(self):
-        self.setWindowTitle("Введите")
-        nameParam = QLabel("Название")
-        self.name_Param = QLineEdit()
-        yearParam = QLabel("Год")
-        self.year_Param = QLineEdit()
-        combParam = QLabel("Жанр")
-        self.comb_Param = QComboBox()
-        self.comb_Param.addItems(tuple(
-            'комедия драма мелодрама детектив документальный ужасы музыка фантастика анимация биография боевик приключения война семейный триллер фэнтези вестерн мистика короткометражный мюзикл исторический нуар'.split()))
-        durParam = QLabel("Длительность")
-        self.dur_Param = QLineEdit()
-        self.check_Param = QLabel("")
-        saveButton = QPushButton("ДОБАВИТЬ")
-        hbox1 = QHBoxLayout()
-        hbox1.addWidget(nameParam)
-        hbox1.addWidget(self.name_Param)
-
-        hbox2 = QHBoxLayout()
-        hbox2.addWidget(yearParam)
-        hbox2.addWidget(self.year_Param)
-
-        hbox3 = QHBoxLayout()
-        hbox3.addWidget(combParam)
-        hbox3.addWidget(self.comb_Param)
-
-        hbox4 = QHBoxLayout()
-        hbox4.addWidget(durParam)
-        hbox4.addWidget(self.dur_Param)
-
-        hbox5 = QHBoxLayout()
-        hbox5.addWidget(self.check_Param)
-
-        hbox6 = QHBoxLayout()
-        hbox6.addWidget(saveButton)
-        mainLayout = QVBoxLayout()
-        mainLayout.setSpacing(6)
-        mainLayout.addLayout(hbox1)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox2)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox3)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox4)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox5)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox6)
-        self.setLayout(mainLayout)
-
-        saveButton.clicked.connect(self.to_save)
-
-    def to_save(self):
-        if self.name_Param.text() != '' and self.year_Param.text() != '' and self.dur_Param.text() != '' and \
-                self.dur_Param.text()[
-                    0] != '-' and self.dur_Param.text().isdigit() and self.year_Param.text().isdigit() and 0 < int(
-                self.year_Param.text()) < 2022:
+    def add(self):
+        a, b, c, d, e, f, g = self.lineEdit.text(), self.lineEdit_2.text(), self.lineEdit_3.text(), self.lineEdit_4.text(), self.lineEdit_5.text(), self.lineEdit_6.text(), self.lineEdit_7.text()
+        try:
+            self.parent.cur.execute(
+                f"""INSERT INTO coffees(id, name, stage, type, description, cost, volume) VALUES({int(a)}, {"'" + b + "'"}, {"'" + c + "'"}, {"'" + d + "'"}, {"'" + e + "'"}, {"'" + f + "'"}, {"'" + g + "'"})""")
+            self.parent.con.commit()
+            self.parent.update_result_1()
             self.close()
-        else:
-            self.check_Param.setText('Неверные данные')
+        except:
+            pass
 
 
-class Dialog_change(QDialog):
-    def __init__(self, parent=None, volume=0):
-        super(Dialog_change, self).__init__(parent)
-        self.initUI()
+    def change(self):
+        a, b, c, d, e, f, g = self.lineEdit.text(), self.lineEdit_2.text(), self.lineEdit_3.text(), self.lineEdit_4.text(), self.lineEdit_5.text(), self.lineEdit_6.text(), self.lineEdit_7.text()
+        try:
+            print(4444)
 
-    def initUI(self):
-        self.setWindowTitle("Введите")
-        nameParam = QLabel("Название")
-        self.name_Param = QLineEdit()
-        yearParam = QLabel("Год")
-        self.year_Param = QLineEdit()
-        combParam = QLabel("Жанр")
-        self.comb_Param = QComboBox()
-        self.comb_Param.addItems(tuple(
-            'комедия драма мелодрама детектив документальный ужасы музыка фантастика анимация биография боевик приключения война семейный триллер фэнтези вестерн мистика короткометражный мюзикл исторический нуар'.split()))
-        durParam = QLabel("Длительность")
-        self.dur_Param = QLineEdit()
-        self.check_Param = QLabel("")
-        saveButton = QPushButton("ДОБАВИТЬ")
-        hbox1 = QHBoxLayout()
-        hbox1.addWidget(nameParam)
-        hbox1.addWidget(self.name_Param)
+            self.parent.cur.execute(
+                f"""UPDATE coffees SET name = {"'" + b + "'"}, stage = {"'" + c + "'"}, type = {"'" + d + "'"}, description = {"'" + e + "'"}, cost = {"'" + f + "'"}, volume = {"'" + g + "'"} WHERE id = {int(a)}""")
 
-        hbox2 = QHBoxLayout()
-        hbox2.addWidget(yearParam)
-        hbox2.addWidget(self.year_Param)
-
-        hbox3 = QHBoxLayout()
-        hbox3.addWidget(combParam)
-        hbox3.addWidget(self.comb_Param)
-
-        hbox4 = QHBoxLayout()
-        hbox4.addWidget(durParam)
-        hbox4.addWidget(self.dur_Param)
-
-        hbox5 = QHBoxLayout()
-        hbox5.addWidget(self.check_Param)
-
-        hbox6 = QHBoxLayout()
-        hbox6.addWidget(saveButton)
-        mainLayout = QVBoxLayout()
-        mainLayout.setSpacing(6)
-        mainLayout.addLayout(hbox1)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox2)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox3)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox4)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox5)
-        mainLayout.addStretch(1)
-        mainLayout.addLayout(hbox6)
-        self.setLayout(mainLayout)
-
-        saveButton.clicked.connect(self.to_save)
-
-    def to_save(self):
-        if self.name_Param.text() != '' and self.year_Param.text() != '' and self.dur_Param.text() != '' and \
-                self.dur_Param.text()[
-                    0] != '-' and self.dur_Param.text().isdigit() and self.year_Param.text().isdigit() and 0 < int(
-                self.year_Param.text()) < 2022:
+            self.parent.con.commit()
+            print(7777)
+            self.parent.update_result_1()
             self.close()
-        else:
-            self.check_Param.setText('Неверные данные')
-
+        except:
+            pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
