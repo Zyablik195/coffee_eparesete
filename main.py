@@ -5,13 +5,15 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QInputDialog, QDialog
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QTextEdit, QPushButton, QGridLayout, QVBoxLayout, QLineEdit, \
     QLabel, QHBoxLayout, QComboBox
+from main1 import *
+from addEditCoffeeForm import *
 
 
-class MyWidget(QMainWindow):
+class MyWidget(Ui_MainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi("main.ui", self)
-        self.con = sqlite3.connect("coffee.sqlite")
+        super().setupUi(self)
+        self.con = sqlite3.connect("data/coffee.sqlite")
         self.pushButton_1.clicked.connect(self.add_1)
         self.lll_1 = -1
         self.lll_2 = -1
@@ -85,11 +87,12 @@ FROM
                 self.tableWidget_1.setItem(i, j, QTableWidgetItem(str(val)))
 
 
-class Dialog_add(QDialog):
+class Dialog_add(Ui_Dialog):
     def __init__(self, parent=None):
         super().__init__()
+        super().setupUi(self)
         self.parent = parent
-        uic.loadUi("addEditCoffeeForm.ui", self)
+        # uic.loadUi("addEditCoffeeForm.ui", self)
         self.pushButton.clicked.connect(self.add)
         self.pushButton_2.clicked.connect(self.change)
 
